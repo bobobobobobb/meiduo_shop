@@ -21,3 +21,6 @@ class Area(models.Model):
 
 
 
+
+
+

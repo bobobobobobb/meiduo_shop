@@ -63,7 +63,7 @@
 		</div>
 		<div class="right_content clearfix">
 			<div class="site_top_con">
-				<a href="javascript:;">新增收货地址</a>
+				<a href="javascript:;" @click="show_add_site">新增收货地址</a>
 				<span>你已创建了<b>2</b>个收货地址，最多可创建<b>20</b>个</span>
 			</div>
 			<div class="site_con">
@@ -82,7 +82,7 @@
 					<li><span>电子邮箱：</span><b>dashan@126.com</b></li>
 				</ul>
 				<div class="down_btn">
-					<a href="javascript:;"  class="edit_icon">编辑</a>
+					<a href="javascript:;"  class="edit_icon" @click="show_edit_site">编辑</a>
 				</div>
 			</div>
 
@@ -121,7 +121,7 @@
 		<p>电话：010-****888    京ICP备*******8号</p>
 	</div>
 
-	<div class="pop_con">
+	<div class="pop_con" v-show="is_show_edit">
 		<div class="site_con site_pop">
 				<div class="site_pop_title">
 					<h3>新增收货地址</h3>
@@ -130,8 +130,8 @@
 				<form>
 					<div class="form_group">
 						<label>收货人：</label>
-						<input type="text" name="receiver" class="receiver">
-                        <span class="receiver_error">请填写收货人</span>
+						<input type="text" name="receiver" class="receiver" v-model="receiver" @blur="check_receiver">
+                        <span class="receiver_error" v-show="error_receiver">请填写收货人</span>
 					</div>
 					<div class="form_group">
 						<label>所在地区：</label>
@@ -153,25 +153,25 @@
 					</div>
 					<div class="form_group">
 						<label>详细地址：</label>
-						<input type="text" name="place" class="place">
-                        <span class="place_error">请填写详细地址</span>
+						<input type="text" name="place" class="place" v-model="place" @blur="check_place">
+                        <span class="place_error" v-show="error_place">请填写详细地址</span>
 					</div>
 					<div class="form_group">
 						<label>手机：</label>
-						<input type="text" name="mobile" class="mobile">
-                        <span class="mobile_error">手机号有误</span>
+						<input type="text" name="mobile" class="mobile" v-model="mobile" @blur="check_mobile">
+                        <span class="mobile_error" v-show="error_mobile">手机号有误</span>
 					</div>
 					<div class="form_group">
 						<label>固定电话：</label>
-						<input type="text" name="tel" class="tel">
-                        <span class="tel_error">固定电话有误</span>
+						<input type="text" name="tel" class="tel" v-model="tel" v-blur="check_tel">
+                        <span class="tel_error" v-show="error_email">固定电话有误</span>
 					</div>
 					<div class="form_group">
 						<label>邮箱：</label>
-						<input type="text" name="email" class="email">
-                        <span class="email_error">邮箱格式有误</span>
+						<input type="text" name="email" class="email" v-model="email" v-blur="check_email">
+                        <span class="email_error" v-show="error_email">邮箱格式有误</span>
 					</div>
-					<input type="button" name="" value="新 增" class="info_submit">
+					<input type="button" name="" value="新 增" class="info_submit" @click="save_address">
 					<input type="reset" name="" value="取 消" class="info_submit info_reset">
 				</form>
 		</div>
