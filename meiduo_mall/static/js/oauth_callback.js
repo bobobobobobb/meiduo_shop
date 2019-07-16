@@ -4,7 +4,7 @@ let vm = new Vue({
 	data: {
 		mobile: '',
 		password: '',
-		image_code: '',
+		pic_code: '',
 		sms_code: '',
 
 		error_mobile: false,
@@ -32,7 +32,9 @@ let vm = new Vue({
 			// 生成一个编号 : 严格一点的使用uuid保证编号唯一， 不是很严谨的情况下，也可以使用时间戳
 			this.uuid = generateUUID();
 			// 设置页面中图形验证码img标签的src属性
-			this.image_code_url = "/image_codes/" + this.uuid + "/";
+			//vertify/(?P<uuid>[\w-]+)/
+			// this.image_code_url = "/image_codes/" + this.uuid + "/";
+			this.image_code_url = "/vertify/" + this.uuid + "/";
 		},
 		// 检查手机号
 		check_mobile(){
@@ -51,11 +53,12 @@ let vm = new Vue({
 				this.error_password = false;
 			} else {
 				this.error_password = true;
+				this.error_password_message = '请输入手机号'
 			}
 		},
 		// 检查图片验证码
 		check_image_code(){
-			if(!this.image_code) {
+			if(this.pic_code=='') {
 				this.error_image_code_message = '请填写图片验证码';
 				this.error_image_code = true;
 			} else {
@@ -73,28 +76,38 @@ let vm = new Vue({
 		},
 		// 发送手机短信验证码
 		send_sms_code(){
-			if (this.sending_flag == true) {
-				return;
-			}
-			this.sending_flag = true;
+			// if (this.sending_flag == true) {
+			// 	return;
+			// }
+			//this.sending_flag = true;
 
 			// 校验参数，保证输入框有数据填写
 			this.check_mobile();
 			this.check_image_code();
 
 			if (this.error_mobile == true || this.error_image_code == true) {
-				this.sending_flag = false;
+				//this.sending_flag = false;
 				return;
 			}
 
 			// 向后端接口发送请求，让后端发送短信验证码
-			let url = '/sms_codes/' + this.mobile + '/?image_code=' + this.image_code+'&image_code_id='+ this.uuid;
-			axios.get(url, {
+			// let url = '/sms_codes/' + this.mobile + '/?image_code=' + this.image_code+'&image_code_id='+ this.uuid;
+			// 参数有手机号mobile  pic_code  uuid
+			let url = '/get_sms_code/';
+			axios.post(url, {
+				mobile:this.mobile,
+				pic_code:this.pic_code,
+				uuid:this.uuid,
+			},{
+				headers:{
+					'X-CSRFToken': getCookie('csrftoken')
+				},
 				responseType: 'json'
 			})
 				.then(response => {
 					// 表示后端发送短信成功
-					if (response.data.code == '0') {
+					if (response.
+							data.code == '1') {
 						// 倒计时60秒，60秒后允许用户再次点击发送短信验证码的按钮
 						let num = 60;
 						// 设置一个计时器
@@ -105,7 +118,7 @@ let vm = new Vue({
 								// 将点击获取验证码的按钮展示的文本回复成原始文本
 								this.sms_code_tip = '获取短信验证码';
 								// 将点击按钮的onclick事件函数恢复回去
-								this.sending_flag = false;
+								//this.sending_flag = false;
 							} else {
 								num -= 1;
 								// 展示倒计时信息
@@ -114,19 +127,18 @@ let vm = new Vue({
 						}, 1000, 60)
 					} else {
 						if (response.data.code == '4001') {
-							this.error_image_code_message = response.data.errmsg;
-							this.error_image_code = true;
+							this.generate_image_code();
+                            alert('输入验证码错误')
                         } else { // 4002
-							this.error_sms_code_message = response.data.errmsg;
-							this.error_sms_code = true;
+							 this.generate_image_code();
+                                alert('短信发送频繁')
 						}
-						this.generate_image_code();
-						this.sending_flag = false;
+						// this.generate_image_code();
+						// this.sending_flag = false;
 					}
 				})
 				.catch(error => {
-					console.log(error.response);
-					this.sending_flag = false;
+					 alert('发送post请求失败')
 				})
 		},
 		// 绑定openid

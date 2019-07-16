@@ -75,7 +75,7 @@ class GetSmsView(View):
 
             # 使用celery异步发送短信
             from celery_tasks.sms.tasks import send_sms
-            send_sms(13068001619, message)
+            send_sms(18801315163, message)
 
             # 返回应答
             return JsonResponse({"code": 1})
@@ -98,3 +98,6 @@ class CheckMObileView(View):
 
         # 返回应答 根据count值进行判断
         return JsonResponse({'code': count})
+
+
+

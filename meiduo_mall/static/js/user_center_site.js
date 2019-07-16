@@ -42,14 +42,15 @@ var vm = new Vue({
     watch: {
         // 监听到省份id变化
         'form_address.province_id': function () {
+            alert(this.form_address.province_id);
             if (this.form_address.province_id) {
-                var url = this.host + '/areas/?area_id=' + this.form_address.province_id;
+                var url = this.host + '/area/?parent_id=' + this.form_address.province_id;
                 axios.get(url, {
                     responseType: 'json'
                 })
                     .then(response => {
                         if (response.data.code == '0') {
-                            this.cities = response.data.sub_data.subs;
+                            this.cities = response.data.areas;
                         } else {
                             console.log(response.data);
                             this.cities = [];
@@ -64,13 +65,13 @@ var vm = new Vue({
         // 监听到城市id变化
         'form_address.city_id': function () {
             if (this.form_address.city_id) {
-                var url = this.host + '/areas/?area_id=' + this.form_address.city_id;
+                var url = this.host + '/area/?parent_id=' + this.form_address.city_id;
                 axios.get(url, {
                     responseType: 'json'
                 })
                     .then(response => {
                         if (response.data.code == '0') {
-                            this.districts = response.data.sub_data.subs;
+                            this.districts = response.data.areas;
                         } else {
                             console.log(response.data);
                             this.districts = [];
@@ -86,13 +87,13 @@ var vm = new Vue({
     methods: {
         // 获取省份数据
         get_provinces(){
-            var url = this.host + '/areas/';
+            var url = this.host + '/area/';
             axios.get(url, {
                 responseType: 'json'
             })
                 .then(response => {
                     if (response.data.code == '0') {
-                        this.provinces = response.data.province_list;
+                        this.provinces = response.data.pros;
                     } else {
                         console.log(response.data);
                         this.provinces = [];
