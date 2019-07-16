@@ -2,55 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2f4f0f36-4c79-4326-a75d-3f81175e1e46" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/watcherTasks.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/admin.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/apps.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/migrations/0001_initial.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/migrations/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/models.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/tests.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/urls.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/area/views.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/admin.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/apps.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/migrations/0001_initial.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/migrations/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/models.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/tests.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/urls.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/utils.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/qauth/views.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/users/migrations/0005_user_email_active.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/users/utils.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/celery_tasks/send_email/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/celery_tasks/send_email/tasks.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/templates/user_center_info.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/utils/models.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/static/user_center_info.html" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/static/oauth_callback.html" afterPath="$PROJECT_DIR$/templates/oauth_callback.html" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/static/user_center_site.html" afterPath="$PROJECT_DIR$/templates/user_center_site.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/users/models.py" afterPath="$PROJECT_DIR$/apps/users/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/users/urls.py" afterPath="$PROJECT_DIR$/apps/users/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/users/views.py" afterPath="$PROJECT_DIR$/apps/users/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/vertification/views.py" afterPath="$PROJECT_DIR$/apps/vertification/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/meiduo_mall/settings.py" afterPath="$PROJECT_DIR$/meiduo_mall/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/meiduo_mall/urls.py" afterPath="$PROJECT_DIR$/meiduo_mall/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/css/main.css" afterPath="$PROJECT_DIR$/static/css/main.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/goods_judge.html" afterPath="$PROJECT_DIR$/static/goods_judge.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/js/login.js" afterPath="$PROJECT_DIR$/static/js/login.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/js/oauth_callback.js" afterPath="$PROJECT_DIR$/static/js/oauth_callback.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/js/user_center_info.js" afterPath="$PROJECT_DIR$/static/js/user_center_info.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/js/user_center_site.js" afterPath="$PROJECT_DIR$/static/js/user_center_site.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/order_success.html" afterPath="$PROJECT_DIR$/static/order_success.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/pay_success.html" afterPath="$PROJECT_DIR$/static/pay_success.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/place_order.html" afterPath="$PROJECT_DIR$/static/place_order.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/user_center_order.html" afterPath="$PROJECT_DIR$/static/user_center_order.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/user_center_pass.html" afterPath="$PROJECT_DIR$/static/user_center_pass.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/index.html" afterPath="$PROJECT_DIR$/templates/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/login.html" afterPath="$PROJECT_DIR$/templates/login.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/user_center_info.html" afterPath="$PROJECT_DIR$/templates/user_center_info.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/user_center_site.html" afterPath="$PROJECT_DIR$/templates/user_center_site.html" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -626,6 +581,14 @@
       <option name="presentableId" value="Default" />
       <updated>1562494690784</updated>
     </task>
+    <task id="LOCAL-00001" summary="实现地区三级联动">
+      <created>1563269418620</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1563269418620</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TodoView">
@@ -666,6 +629,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="实现地区三级联动" />
+    <option name="LAST_COMMIT_MESSAGE" value="实现地区三级联动" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -815,6 +782,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="372">
           <caret line="42" column="33" lean-forward="false" selection-start-line="42" selection-start-column="33" selection-end-line="42" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -948,6 +916,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="155">
           <caret line="6" column="16" lean-forward="false" selection-start-line="6" selection-start-column="4" selection-end-line="6" selection-end-column="16" />
+          <folding />
         </state>
       </provider>
     </entry>
