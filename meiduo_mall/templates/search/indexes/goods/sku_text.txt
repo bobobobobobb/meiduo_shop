@@ -1,0 +1,5 @@
+# 这里就是我们设置 数据库中的哪些字段进行检索
+# object 理解为 对象的一个实例 object = SKU()
+{{ object.name }}
+{{ object.caption }}
+{{ object.id }}

@@ -1,8 +1,12 @@
+from django import http
 from django.contrib.auth import login, logout
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views import View
 import re
+
+from apps.goods.models import SKU
 from .models import User
 from django.urls import reverse
 import json
@@ -10,6 +14,9 @@ from utils.response_code import RETCODE
 from celery_tasks.send_email.tasks import send_active_email
 from .utils import check_token
 from itsdangerous import BadSignature
+from .models import Address
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django_redis import get_redis_connection
 
 """
     1,获取数据
@@ -129,9 +136,6 @@ class LogoutView(View):
         return response
 
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-
-
 class UserCenterView(LoginRequiredMixin, View):
     # 两种方式   一种设置login_url    一种设置settings.LOGIN_URL
     login_url = '/login/'
@@ -230,3 +234,356 @@ class SeeStateView(View):
 class UserCenterSiteView(View):
     def get(self, request):
         return render(request, 'user_center_site.html')
+
+
+# /addresses/create/    添加地址
+class CreateAddressView(View):
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        # 接受参数
+        """
+        title: '',
+            receiver: '',
+            province_id: '',
+            city_id: '',
+            district_id: '',
+            place: '',
+            mobile: '',
+            tel: '',
+            email: '',
+        :param request:
+        :return:
+        """
+        # b'{"title":"fsdfsdf","receiver":"fsdfsdf","province_id":440000,"city_id":440800,
+        # "district_id":440882,"place":"fsdfdsd","mobile":"13068001213","tel":"","email":""}'
+        # 判断 地址数量是否超过20
+        if Address.objects.filter(is_deleted=0).count() >= 20:
+            return JsonResponse({"code": RETCODE.DBERR, "errmsg": "添加地址失败"})
+        body_data = request.body
+        data = body_data.decode()
+        import json
+        address_dict = json.loads(data)
+        title = address_dict["title"]
+        receiver = address_dict["receiver"]
+        province_id = address_dict["province_id"]
+        city_id = address_dict["city_id"]
+        district_id = address_dict["district_id"]
+        place = address_dict["place"]
+        mobile = address_dict["mobile"]
+        tel = address_dict["tel"]
+        email = address_dict["email"]
+
+        # 校验数据
+        if not all([title, receiver, province_id, city_id, district_id, place, mobile]):
+            return HttpResponseBadRequest("参数不全")
+        if not re.match(r'^1[3-9]\d{9}$', mobile):
+            return JsonResponse({"code": "4007"})
+        if tel:
+            if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
+                return HttpResponseBadRequest('参数tel有误')
+        if email:
+            if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+                return HttpResponseBadRequest('参数email有误')
+                # 保存地址信息
+        try:
+            address = Address.objects.create(
+                user=request.user,
+                title=receiver,
+                receiver=receiver,
+                province_id=province_id,
+                city_id=city_id,
+                district_id=district_id,
+                place=place,
+                mobile=mobile,
+                tel=tel,
+                email=email
+            )
+            # 设置默认地址
+            if not request.user.default_address:
+                request.user.default_address = address
+                request.user.save()
+        except Exception as e:
+            # logger.error(e)
+            return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '新增地址失败'})
+
+            # 新增地址成功，将新增的地址响应给前端实现局部刷新
+        address_dict = {
+            "id": address.id,
+            "title": address.title,
+            "receiver": address.receiver,
+            "province": address.province.name,
+            "city": address.city.name,
+            "district": address.district.name,
+            "place": address.place,
+            "mobile": address.mobile,
+            "tel": address.tel,
+            "email": address.email
+        }
+        #### 不能将一个对象传递给前端  对于ajax请求
+        # 添加地址成功
+        return JsonResponse({"code": RETCODE.OK, "address": address_dict})
+
+
+# 展示地址   /show_address/
+class ShowAddressView(LoginRequiredMixin, View):
+    login_url = '/login/'
+
+    def get(self, request):
+        #####  先要检验用户是否登陆
+        user = request.user
+        # 查询出所有的地址
+        addresses = Address.objects.filter(user=user, is_deleted=False)
+
+        # 构造地址列表
+        address_list = []
+        for address in addresses:
+            add_dict = {
+                "id": address.id,
+                "title": address.title,
+                "receiver": address.receiver,
+                "province": address.province.name,
+                "province_id": address.province_id,  ###  province_id  为隐藏属性
+                "city": address.city.name,
+                "city_id": address.city_id,
+                "district": address.district.name,
+                "district_id": address.district_id,
+                "place": address.place,
+                "mobile": address.mobile,
+                "tel": address.tel,
+                "email": address.email
+                ### "is_deleted": address.is_deleted    已经进行了条件判断   这个属性不用传送
+            }
+            address_list.append(add_dict)
+
+        context = {
+            'default_address_id': user.default_address_id,  ###又见隐藏属性
+            'addresses': address_list,
+        }
+
+        return render(request, 'user_center_site.html', context)  ### 向模板中传递字典
+
+
+# 修改地址  路径  addresses/(?P<address_id>\d+)/$   方法:put
+class UpdateAddressView(View):
+    def put(self, request, address_id):
+        # 接收参数
+        json_dict = json.loads(request.body.decode())
+        receiver = json_dict.get('receiver')
+        province_id = json_dict.get('province_id')
+        city_id = json_dict.get('city_id')
+        district_id = json_dict.get('district_id')
+        place = json_dict.get('place')
+        mobile = json_dict.get('mobile')
+        tel = json_dict.get('tel')
+        email = json_dict.get('email')
+
+        # 校验参数
+        if not all([receiver, province_id, city_id, district_id, place, mobile]):
+            return HttpResponseBadRequest('缺少必传参数')
+        if not re.match(r'^1[3-9]\d{9}$', mobile):
+            return HttpResponseBadRequest('参数mobile有误')
+        if tel:
+            if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
+                return HttpResponseBadRequest('参数tel有误')
+        if email:
+            if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+                return HttpResponseBadRequest('参数email有误')
+
+        # 判断地址是否存在,并更新地址信息
+        try:
+            Address.objects.filter(id=address_id).update(
+                user=request.user,
+                title=receiver,
+                receiver=receiver,
+                province_id=province_id,
+                city_id=city_id,
+                district_id=district_id,
+                place=place,
+                mobile=mobile,
+                tel=tel,
+                email=email
+            )
+        except Exception as e:
+            # 异常捕获需要写入日志
+            # logger.error(e)
+            return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '更新地址失败'})
+
+        # 构造响应数据
+        address = Address.objects.get(id=address_id)
+        address_dict = {
+            "id": address.id,
+            "title": address.title,
+            "receiver": address.receiver,
+            "province": address.province.name,
+            "city": address.city.name,
+            "district": address.district.name,
+            "place": address.place,
+            "mobile": address.mobile,
+            "tel": address.tel,
+            "email": address.email
+        }
+
+        # 响应更新地址结果
+        return JsonResponse({'code': RETCODE.OK, 'errmsg': '更新地址成功', 'address': address_dict})
+
+
+# 删除地址  /addresses/' + this.addresses[index].id + '/';   方式delete
+class DeleteAddressView(View):
+    def delete(self, request, address_id):
+        # 判断该地址是否存在
+        # 逻辑删除
+        # 返回响应
+        try:
+            # 查询要删除的地址
+            address = Address.objects.get(id=address_id)
+
+            # 将地址逻辑删除设置为True
+            address.is_deleted = True
+            address.save()
+        except Exception as e:
+            # logger.error(e)
+            return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '删除地址失败'})
+
+            # 响应删除地址结果
+        return JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
+
+
+# /addresses/' + this.addresses[index].id + '/default/'  put   设置默认地址
+class SetDefaultAddressView(View):
+    def put(self, request, address_id):
+        # 查询该地址
+        try:
+            user = request.user
+            address = Address.objects.get(id=address_id)
+
+        except Address.DoesNotExist:
+            return JsonResponse({"code": "1", "errmsg": "设置默认地址失败"})
+
+        user.default_address_id = address.id
+        user.save()
+        return JsonResponse({"code": RETCODE.OK, "errmsg": "设置成功"})
+
+
+class UpdateTitleAddressView(LoginRequiredMixin, View):
+    """设置地址标题"""
+
+    def put(self, request, address_id):
+        """设置地址标题"""
+        # 接收参数：地址标题
+        json_dict = json.loads(request.body.decode())
+        title = json_dict.get('title')
+
+        try:
+            # 查询地址
+            address = Address.objects.get(id=address_id)
+
+            # 设置新的地址标题
+            address.title = title
+            address.save()
+        except Exception as e:
+            # logger.error(e)
+            return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '设置地址标题失败'})
+
+        # 4.响应删除地址结果
+        return JsonResponse({'code': RETCODE.OK, 'errmsg': '设置地址标题成功'})
+
+
+class ChangePasswordView(LoginRequiredMixin, View):
+    """修改密码"""
+
+    def get(self, request):
+        """展示修改密码界面"""
+        return render(request, 'user_center_pass.html')
+
+    def post(self, request):
+        """实现修改密码逻辑"""
+        # 1.接收参数
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        new_password2 = request.POST.get('new_password2')
+        # 2.验证参数
+        if not all([old_password, new_password, new_password2]):
+            return HttpResponseForbidden('缺少必传参数')
+        if not re.match(r'^[0-9A-Za-z]{8,20}$', new_password):
+            return HttpResponseBadRequest('密码最少8位，最长20位')
+        if new_password != new_password2:
+            return HttpResponseBadRequest('两次输入的密码不一致')
+
+        # 3.检验旧密码是否正确
+        if not request.user.check_password(old_password):
+            return render(request, 'user_center_pass.html', {'origin_password_errmsg': '原始密码错误'})
+        # 4.更新新密码
+        try:
+            request.user.set_password(new_password)
+            request.user.save()
+        except Exception as e:
+            # logger.error(e)
+            return render(request, 'user_center_pass.html', {'change_password_errmsg': '修改密码失败'})
+        # 5.退出登陆,删除登陆信息
+        logout(request)
+        # 6.跳转到登陆页面
+        response = redirect(reverse('users:login'))
+
+        response.delete_cookie('username')
+
+        return response
+
+
+# browse_histories/  post  sku_id
+class HistoryView(View):
+    def post(self, request):
+        dict_data = json.loads(request.body.decode())
+        sku_id = dict_data['sku_id']
+
+        ####### 接受数据的第一步就是验证数据
+        try:
+            SKU.objects.get(pk=sku_id)
+        except SKU.DoesNotExist:
+            return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有此商品'})
+        # 链接redis
+        try:
+            redis_conn = get_redis_connection('history')
+            redis_conn.lrem('history:%s' % request.user.id, 0, sku_id)
+            #     3.3 再添加
+            # redis_conn.lpush(key,value)
+            redis_conn.lpush('history:%s' % request.user.id, sku_id)
+            #     3.4 列表中只保存5条记录
+            # redis_conn.ltrim(key,start,stop)
+            redis_conn.ltrim('history:%s' % request.user.id, 0, 4)
+            # 4.返回相应
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok'})
+        except Exception as e:
+            return JsonResponse({'code': RETCODE.DBERR})
+
+    def get(self, request):
+        """
+        browse_histories/
+        get
+
+        :param request:
+        :return:
+        """
+        # 链接redis
+        # 获取前五个数据
+        # 查询该sku_id对应的相关信息 图片 名称  价格  url
+        # 返回# 1.连接redis
+        redis_conn = get_redis_connection('history')
+        # 2.获取列表数据 [1,2,3,4]
+        ids = redis_conn.lrange('history:%s' % request.user.id, 0, 4)
+        # 3.根据id查询商品详情
+        skus = []
+        for id in ids:
+            sku = SKU.objects.get(pk=id)
+            # 4.组织json数据
+            skus.append({
+                'id': sku.id,
+                'name': sku.name,
+                'default_image_url': sku.default_image.url,
+                'price': sku.price,
+            })
+        # 5.返回相应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok', 'skus': skus})
+
+

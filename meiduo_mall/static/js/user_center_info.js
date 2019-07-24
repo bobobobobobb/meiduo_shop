@@ -18,6 +18,7 @@ var vm = new Vue({
         sending_email_flag: false,
         send_email_message:'请点击按钮,激活邮箱',
         set_email_flag: false,
+        sku_id:''
     },
     // ES6语法
     mounted() {
@@ -28,7 +29,7 @@ var vm = new Vue({
         this.see_state();
         //this.set_email = true
         // 请求浏览历史记录
-        //this.browse_histories();
+        this.browse_histories();
     },
     methods: {
         //查看验证状态
@@ -198,8 +199,10 @@ var vm = new Vue({
                 })
                 .then(response => {
                     this.histories = response.data.skus;
+
                     for(var i=0; i<this.histories.length; i++){
-                        this.histories[i].url = '/goods/' + this.histories[i].id + '.html';
+                        this.histories[i].url = '/detail/' + this.histories[i].id + '/';
+
                     }
                 })
                 .catch(error => {

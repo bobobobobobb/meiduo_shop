@@ -47,6 +47,7 @@ var vm = new Vue({
         this.username = getCookie('username');
     },
     watch: {
+
         // 监听商品数量的变化
         sku_count: {
             handler(newValue){
@@ -56,6 +57,10 @@ var vm = new Vue({
         }
     },
     methods: {
+        //does_not_exist
+        does_not_exist(){
+            alert('该商品未上架')
+        },
         // 加数量
         on_addition(){
             if (this.sku_count < 5) {
@@ -102,7 +107,7 @@ var vm = new Vue({
                 .then(response => {
                     this.hots = response.data.hot_skus;
                     for (var i = 0; i < this.hots.length; i++) {
-                        this.hots[i].url = '/goods/' + this.hots[i].id + '.html';
+                        this.hots[i].url = '/detail/' + this.hots[i].id + '/';
                     }
                 })
                 .catch(error => {

@@ -40,6 +40,10 @@ INSTALLED_APPS = [
     'apps.vertification.apps.VertificationConfig',
     'apps.qauth',
     'apps.area',
+    'apps.goods',
+    'apps.carts',
+    'haystack',
+
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -148,6 +152,20 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
+    "history": {  # session
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/4",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "cart": {  # session
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/5",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
 }
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "session"
@@ -214,3 +232,16 @@ EMAIL_HOST_USER = 'qi_rui_hua@163.com'
 EMAIL_HOST_PASSWORD = '123456abc'
 # 收件人看到的发件人
 EMAIL_FROM = '美多商城<qi_rui_hua@163.com>'
+
+# 指定自定义的Django文件存储类
+DEFAULT_FILE_STORAGE = 'utils.fastdfs.storage.MyStorage'
+
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://192.168.48.133:9200/',
+        'INDEX_NAME': 'meiduo',
+    },
+}
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5

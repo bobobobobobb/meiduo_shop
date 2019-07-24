@@ -11,12 +11,11 @@ from utils.response_code import RETCODE
 后端:parent_id 为空时, 返回省级地区
     parent_id  不为空时, 返回市县地区
 
-
-
-
 """
 
 
+# 获取所有的省份
+# /area/
 class AreasView(View):
     def get(self, request):
         parent_id = request.GET.get('parent_id')
@@ -47,17 +46,3 @@ class AreasView(View):
                     "name": area.name
                 })
             return JsonResponse({"areas": areas_list, "code": RETCODE.OK})
-
-
-
-
-
-
-
-
-
-
-
-
-
-

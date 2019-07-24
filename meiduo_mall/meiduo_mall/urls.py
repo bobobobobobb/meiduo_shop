@@ -23,5 +23,10 @@ urlpatterns = [
     url(r'^', include('apps.vertification.urls', namespace='vertification')),
     url(r'^', include('apps.qauth.urls', namespace='qauth')),
     url(r'^', include('apps.area.urls', namespace='area')),
+    url(r'^', include('apps.goods.urls', namespace='goods')),
+    url(r'^', include('apps.carts.urls', namespace='carts')),
+
+    url(r'^search/', include('haystack.urls')),
+
 
 ]

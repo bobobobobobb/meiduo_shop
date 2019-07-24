@@ -121,3 +121,6 @@ class OauthCallBack(View):
         response = redirect(reverse('contents:index'))
         response.set_cookie('username', user.username)
         return response
+
+
+

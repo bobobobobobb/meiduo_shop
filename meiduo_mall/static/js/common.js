@@ -4,6 +4,7 @@ function getCookie(name) {
     return r ? r[1] : undefined;
 }
 
+
 // 提取地址栏中的查询字符串
 function get_query_string(name) {
     var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');

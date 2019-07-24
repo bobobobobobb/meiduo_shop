@@ -26,23 +26,35 @@ var vm = new Vue({
         error_email: false,
         addresses: [],
         editing_address_index: '',
-        default_address_id: '',
+        default_address_id: 'default_address_id',
         edit_title_index: '',
         input_title: '',
-        add_title:'新  增'
+        add_title:'新  增',
+        default_address: '默认地址',
+        addressss:'addresses',
+
     },
     mounted(){
         // 获取省份数据
         this.get_provinces();
-        // 将用户地址列表绑定到变量, addresses 是django模板传给vue的json字符串
-        // this.addresses = JSON.parse(JSON.stringify(addresses));
+        // 将用户地址列表绑定到变量, addresses 是django模板传给vue的json字符串   该变量属于不同的语言,需要通过json进行转换
+        // 整个模板被加载完成之后,立马进行赋值
+        //this.addresses = JSON.parse(JSON.stringify(addresses));
         // 默认地址id
-        // this.default_address_id = default_address_id;
+        //this.default_address_id = default_address_id;
+        this.get();
+        //this.addresses[0].id = default_address_id;
+//         response.data.result.forEach((item, index) => {
+//
+// 用item操作每一条数据。   for(let item of response.data.result)
+//
+// }）
+
     },
     watch: {
         // 监听到省份id变化
         'form_address.province_id': function () {
-            alert(this.form_address.province_id);
+            // alert(this.form_address.province_id);
             if (this.form_address.province_id) {
                 var url = this.host + '/area/?parent_id=' + this.form_address.province_id;
                 axios.get(url, {
@@ -85,6 +97,29 @@ var vm = new Vue({
         }
     },
     methods: {
+        get(){
+            this.addresses = JSON.parse(JSON.stringify(addresses));
+            this.default_address_id = default_address_id;
+            this.temp = '';
+            this.count = 0;
+            if(this.addresses[0].id!=this.default_address_id){
+
+            for(let address of this.addresses){
+                this.count += 1;
+                if(address.id == this.default_address_id){
+
+                    //  交换两个对象的位置   使得默认地址永远在第一位
+                    this.addresses.splice(0, 0, address);
+                    this.addresses.splice(this.count, 1);
+                    // this.temp = this.addresses[0];
+                    // this.addresses[0] = address;
+                    // address = this.temp;
+
+                }
+            }
+        }
+
+        },
         // 获取省份数据
         get_provinces(){
             var url = this.host + '/area/';
@@ -105,7 +140,7 @@ var vm = new Vue({
                 });
         },
         check_receiver(){
-            if (!this.form_address.receiver) {
+            if (this.form_address.receiver=='') {
                 this.error_receiver = true;
             } else {
                 this.error_receiver = false;
@@ -123,7 +158,7 @@ var vm = new Vue({
             if (re.test(this.form_address.mobile)) {
                 this.error_mobile = false;
             } else {
-                this.error_mobile = true;
+                this.error_mobile = false;
             }
         },
         check_tel(){
@@ -178,9 +213,12 @@ var vm = new Vue({
         show_edit_site(index){
             this.is_show_edit = true;
             this.clear_all_errors();
+            //  为什么要用tostring   this.editing_address_index 定义成了字符串
             this.editing_address_index = index.toString();
             // 只获取要编辑的数据，防止修改form_address影响到addresses数据
-            this.form_address = JSON.parse(JSON.stringify(this.addresses[index]));
+            //this.form_address = JSON.parse(JSON.stringify(this.addresses[index]));
+            //我的修改(初始化的时候已经进行了转换, 无需重复操作)
+            this.form_address = this.addresses[index];
             this.add_title='修  改';
         },
         // 新增地址
@@ -190,13 +228,12 @@ var vm = new Vue({
             this.check_mobile();
             this.check_tel();
             this.check_email();
-
             if (this.error_receiver || this.error_place || this.error_mobile || this.error_email || !this.form_address.province_id || !this.form_address.city_id || !this.form_address.district_id) {
                 alert('信息填写有误！');
             } else {
                 // 收货人默认就是收货地址标题
                 this.form_address.title = this.form_address.receiver;
-                // 注意：0 == '';返回true; 0 === '';返回false;
+                // 注意：0 == '';返回true; 0 === '';返回false;  第一个地址是个例外,所以要进行判断
                 if (this.editing_address_index === '') {
                     // 新增地址
                     var url = this.host + '/addresses/create/';
@@ -207,10 +244,11 @@ var vm = new Vue({
                         responseType: 'json'
                     })
                         .then(response => {
-                            if (response.data.code == '0') {
+                            if (response.data.code == "0") {
                                 // location.reload();
                                 // 局部刷新界面：展示所有地址信息，将新的地址添加到头部
-                                this.addresses.splice(0, 0, response.data.address);
+                                alert(response.data.address);
+                                this.addresses.splice(1, 0, response.data.address);
                                 this.is_show_edit = false;
                             } else if (response.data.code == '4101') {
                                 location.href = '/login/?next=/addresses/';
@@ -260,7 +298,7 @@ var vm = new Vue({
         },
         // 删除地址
         delete_address(index){
-            var url = this.host + '/addresses/' + this.addresses[index].id + '/';
+            var url = this.host + '/address/' + this.addresses[index].id + '/';
             axios.delete(url, {
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
@@ -269,7 +307,7 @@ var vm = new Vue({
             })
                 .then(response => {
                     if (response.data.code == '0') {
-                        // 删除对应的标签
+                        // 删除对应的标签  直接删除index即可
                         this.addresses.splice(index, 1);
                     } else if (response.data.code == '4101') {
                         location.href = '/login/?next=/addresses/';
@@ -293,7 +331,11 @@ var vm = new Vue({
                 .then(response => {
                     if (response.data.code == '0') {
                         // 设置默认地址标签
-                        this.default_address_id = this.addresses[index].id;
+
+
+                        this.addresses.splice(0,0,this.addresses[index]);
+                        this.addresses.splice(index+1, 1);
+                        this.default_address_id = this.addresses[0].id;
                     } else if (response.data.code == '4101') {
                         location.href = '/login/?next=/addresses/';
                     } else {
@@ -312,6 +354,10 @@ var vm = new Vue({
         cancel_title(){
             this.edit_title_index = '';
             this.input_title = '';
+        },
+        // qu取消新增地址
+        cancel_address(){
+            this.is_show_edit = false;
         },
         // 保存地址title
         save_title(index){

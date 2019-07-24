@@ -7,9 +7,11 @@ var vm = new Vue({
         carts: [],
         total_count: 0,
         total_selected_count: 0,
+        total_notselected_count: 0,
         total_selected_amount: 0,
         carts_tmp: [],
         username: '',
+        amount:[],
     },
     computed: {
         selected_all(){
@@ -40,7 +42,7 @@ var vm = new Vue({
         render_carts(){
             // 渲染界面
             this.carts = JSON.parse(JSON.stringify(cart_skus));
-            for (var i = 0; i < this.carts.length; i++) {
+            for (var i = 0; i < this.carts.length; ++i) {
                 if (this.carts[i].selected == 'True') {
                     this.carts[i].selected = true;
                 } else {
@@ -63,9 +65,12 @@ var vm = new Vue({
             var amount = 0;
             var total_count = 0;
             for (var i = 0; i < this.carts.length; i++) {
-                if (this.carts[i].selected) {
+                if (this.carts[i].selected == true) {
+                    this.amount[i] = parseFloat(this.carts[i].price) * parseInt(this.carts[i].count);
                     amount += parseFloat(this.carts[i].price) * parseInt(this.carts[i].count);
                     total_count += parseInt(this.carts[i].count);
+                }else {
+                    this.amount[i] = parseFloat(this.carts[i].price) * parseInt(this.carts[i].count);
                 }
             }
             this.total_selected_amount = amount.toFixed(2); // for循环中不要使用toFixed的累加
@@ -105,10 +110,11 @@ var vm = new Vue({
         // 更新购物车
         update_count(index, count){
             var url = this.host + '/carts/';
+            var selected = !this.carts[index].selected;
             axios.put(url, {
                 sku_id: this.carts[index].id,
                 count: count,
-                selected: this.carts[index].selected
+                selected
             }, {
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
@@ -121,6 +127,7 @@ var vm = new Vue({
                         // this.carts[index].count = response.data.cart_sku.count; // 无法触发页面更新
                         Vue.set(this.carts, index, response.data.cart_sku); // 触发页面更新
                         // 重新计算界面的价格和数量
+                        this.carts[index].selected = !selected;
                         this.compute_total_selected_amount_count();
                         this.compute_total_count();
 
@@ -139,10 +146,11 @@ var vm = new Vue({
         // 更新购物车选中数据
         update_selected(index) {
             var url = this.host + '/carts/';
+            var selected = !this.carts[index].selected;
             axios.put(url, {
                 sku_id: this.carts[index].id,
                 count: this.carts[index].count,
-                selected: this.carts[index].selected
+                selected
             }, {
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
@@ -152,7 +160,7 @@ var vm = new Vue({
             })
                 .then(response => {
                     if (response.data.code == '0') {
-                        this.carts[index].selected = response.data.cart_sku.selected;
+                        this.carts[index].selected = !selected;
                         // 重新计算界面的价格和数量
                         this.compute_total_selected_amount_count();
                         this.compute_total_count();
