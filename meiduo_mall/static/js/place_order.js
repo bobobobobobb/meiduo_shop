@@ -5,15 +5,19 @@ var vm = new Vue({
     data: {
         host: host,
         order_submitting: false, // 正在提交订单标志
-        pay_method: 2, // 支付方式,默认支付宝支付
+        pay_method: '', // 支付方式,默认支付宝支付
         nowsite: '', // 默认地址
         payment_amount: '',
+        username:'',
     },
     mounted(){
         // 初始化
-        this.payment_amount = payment_amount;
+        this.username = getCookie('username');
+        // this.payment_amount = payment_amount;
         // 绑定默认地址
-        this.nowsite = default_address_id;
+        // this.nowsite = default_address_id;
+
+
     },
     methods: {
         // 提交订单

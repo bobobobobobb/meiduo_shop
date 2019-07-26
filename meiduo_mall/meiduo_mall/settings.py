@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'apps.vertification.apps.VertificationConfig',
     'apps.qauth',
     'apps.area',
+    'apps.order',
     'apps.goods',
     'apps.carts',
     'haystack',
